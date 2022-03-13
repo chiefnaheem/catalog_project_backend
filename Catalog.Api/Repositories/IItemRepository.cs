@@ -4,12 +4,12 @@ using Catalog.Api.Entities;
 
 namespace Catalog.Api.Repositories
 {
-	public interface IItemRepository
+	public interface IRepository<T> where T: IEntity
 	{
-		Task<Item> GetItemAsync(string id);
-		Task<List<Item>> GetItemsAsync();
-		Task CreateItemAsync(Item item);
-		Task updateItemAsync(Item item);
+		Task<T> GetItemAsync(string id);
+		Task<List<T>> GetItemsAsync();
+		Task CreateItemAsync(T item);
+		Task updateItemAsync(T item);
 		Task DeleteItemAsync(string id);
 	}
 

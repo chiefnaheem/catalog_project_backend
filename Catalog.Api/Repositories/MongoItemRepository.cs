@@ -6,16 +6,15 @@ using MongoDB.Driver;
 
 namespace Catalog.Api.Repositories
 {
-	public class MongoItemRepository : IItemRepository
+	public class MongoRepository<T> : IRepository<T> where T:IEntity
 	{
 		private const string databaseName = "catalog";
-		private const string collectionName = "items";
-		private readonly IMongoCollection<Item> itemsCollection;
-		private readonly FilterDefinitionBuilder<Item> filterBuilder = Builders<Item>.Filter;
-		public MongoItemRepository(IMongoClient mongoClient)
+		private readonly IMongoCollection<T> itemsCollection;
+		private readonly FilterDefinitionBuilder<T> filterBuilder = Builders<T>.Filter;
+		public MongoRepository(IMongoDatabase database, string collectionName)
 		{
-			IMongoDatabase database = mongoClient.GetDatabase(databaseName);
-			itemsCollection = database.GetCollection<Item>(collectionName);
+			// IMongoDatabase database = mongoClient.GetDatabase(databaseName);
+			itemsCollection = database.GetCollection<T>(collectionName);
 		}
 
 
@@ -27,7 +26,7 @@ namespace Catalog.Api.Repositories
 
 
 
-		public async Task CreateItemAsync(Item item)
+		public async Task CreateItemAsync(T item)
 		{
 			await itemsCollection.InsertOneAsync(item);
 		}
@@ -38,18 +37,18 @@ namespace Catalog.Api.Repositories
 			await itemsCollection.DeleteOneAsync(filter);
 		}
 
-		public async Task<Item> GetItemAsync(string id)
+		public async Task<T> GetItemAsync(string id)
 		{
 			var filter = filterBuilder.Eq(item => item.Id, id);
 			return await itemsCollection.Find(filter).SingleOrDefaultAsync();
 		}
 
-		public async Task<List<Item>> GetItemsAsync()
+		public async Task<List<T>> GetItemsAsync()
 		{
 			return await itemsCollection.Find(new BsonDocument()).ToListAsync();
 		}
 
-		public async Task updateItemAsync(Item item)
+		public async Task updateItemAsync(T item)
 		{
 			var filter = filterBuilder.Eq(existingItem => existingItem.Id, item.Id);
 			await itemsCollection.ReplaceOneAsync(filter, item);

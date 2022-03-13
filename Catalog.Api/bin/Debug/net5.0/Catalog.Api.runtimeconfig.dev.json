@@ -1,0 +1,8 @@
+{
+  "runtimeOptions": {
+    "additionalProbingPaths": [
+      "/Users/decagon/.dotnet/store/|arch|/|tfm|",
+      "/Users/decagon/.nuget/packages"
+    ]
+  }
+}

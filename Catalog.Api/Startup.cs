@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Mime;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Catalog.Api.Entities;
 using Catalog.Api.Repositories;
 using Catalog.Api.settings;
 using Microsoft.AspNetCore.Builder;
@@ -27,6 +28,7 @@ namespace Catalog.Api
 {
 	public class Startup
 	{
+		private ServiceSettings serviceSettings;
 		public Startup(IConfiguration configuration)
 		{
 			Configuration = configuration;
@@ -37,15 +39,8 @@ namespace Catalog.Api
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
-			BsonSerializer.RegisterSerializer(new GuidSerializer(BsonType.String));
-			BsonSerializer.RegisterSerializer(new DateTimeOffsetSerializer(BsonType.String));
-			var mongoDbSettings = Configuration.GetSection(nameof(MongoDbSettings)).Get<MongoDbSettings>();
-			services.AddSingleton<IMongoClient>(ServiceProvider => 
-			{
-				
-				return new MongoClient(mongoDbSettings.ConnectionString);
-			});
-			services.AddSingleton<IItemRepository, MongoItemRepository>();
+			serviceSettings = Configuration.GetSection(nameof(ServiceSettings)).Get<ServiceSettings>();
+			services.AddMongo().AddMongoRepository<Item>("items");
 			services.AddControllers(options => 
 			{
 				options.SuppressAsyncSuffixInActionNames = false;
@@ -54,10 +49,10 @@ namespace Catalog.Api
 			{
 				c.SwaggerDoc("v1", new OpenApiInfo { Title = "Catalog", Version = "v1" });
 			});
-			services.AddHealthChecks().AddMongoDb(mongoDbSettings.ConnectionString,
-										 name: "mongodb",
-										 timeout: TimeSpan.FromSeconds(3),
-										 tags: new[] {"ready"});
+			// services.AddHealthChecks().AddMongoDb(mongoDbSettings.ConnectionString,
+			// 							 name: "mongodb",
+			// 							 timeout: TimeSpan.FromSeconds(3),
+			// 							 tags: new[] {"ready"});
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
